@@ -93,7 +93,6 @@ def shortest_path(source, target):
     """
     # Keep track of number of states explored
     num_explored = 0
-    
     start = Node(state=source, parent=None, action=None)
     end = Node(state=target, parent=None, action=None) 
     frontier = QueueFrontier()

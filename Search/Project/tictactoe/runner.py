@@ -54,7 +54,7 @@ while True:
         screen.blit(playO, playORect)
 
         # Check if button is clicked
-        click, _, _, _, _, = pygame.mouse.get_pressed()
+        click, _, _, = pygame.mouse.get_pressed()
         if click == 1:
             mouse = pygame.mouse.get_pos()
             if playXButton.collidepoint(mouse):
@@ -119,7 +119,7 @@ while True:
                 ai_turn = True
 
         # Check for a user move
-        click, _, _, _, _ = pygame.mouse.get_pressed()
+        click, _, _, = pygame.mouse.get_pressed()
         if click == 1 and user == player and not game_over:
             mouse = pygame.mouse.get_pos()
             for i in range(3):
@@ -134,7 +134,7 @@ while True:
             againRect.center = againButton.center
             pygame.draw.rect(screen, white, againButton)
             screen.blit(again, againRect)
-            click, _, _, _, _ = pygame.mouse.get_pressed()
+            click, _, _, = pygame.mouse.get_pressed()
             if click == 1:
                 mouse = pygame.mouse.get_pos()
                 if againButton.collidepoint(mouse):
