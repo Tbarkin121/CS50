@@ -14,9 +14,9 @@ def initial_state():
     """
     Returns starting state of the board.
     """
-    return [[X, O, X],
-            [O, X, EMPTY],
-            [O, EMPTY, O]]
+    return [[EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY],
+            [EMPTY, EMPTY, EMPTY]]
 
 
 def player(board):
@@ -139,29 +139,64 @@ def utility(board):
     # raise NotImplementedError
 
 def maxValue(board):
-    choice  = (-math.inf, None)
+    # print("")
+    # print("MaxValue Function")
+    # print("Input Board = ")
+    # print(board[0])
+    # print(board[1])
+    # print(board[2])
+    v = (-math.inf, None) #value and action
     if(terminal(board)):
-        return utility(board)
+        # print("Terminal Board")
+        return (utility(board), v[1])
     for action in actions(board):
-        v = (max(v,minValue(result(board, action))), action)
+        # print("Trying Action " + str(action))
+        v_new = (max(v[0],minValue(result(board, action))[0]), action)
+        # print("Return to MaxValue Function")
+        # print("Vold : " + str(v[0]) + " : "  + str(v[1]))
+        # print("Vnew : " + str(v_new[0]) + " : "  + str(v_new[1]))
+        if (v_new[0] > v[0]):
+            v = v_new
+            if(v[0] == 1): #Stop at first win condition
+                return v
     
-    print("MaxValue Function")
-    print("V : " + str(v))
-    print(board)
-    input()
+    # print("V    : " + str(v[0]) + " : "  + str(v[1]))
+    # print(board[0])
+    # print(board[1])
+    # print(board[2])
+    # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    # input()
     return v
 
 def minValue(board):
-    v = (math.inf, None)
+    # print("")
+    # print("MinValue Function")
+    # print("Input Board = ")
+    # print(board[0])
+    # print(board[1])
+    # print(board[2])
+    v = (math.inf, None) #value and action
     if(terminal(board)):
-        return utility(board)
+        # print("Terminal Board")
+        return (utility(board), v[1])
     for action in actions(board):
-        v = (min(v,maxValue(result(board, action))), action)
+        # print("Trying Action " + str(action))
+        v_new = (min(v[0],maxValue(result(board, action))[0]), action)
+        # print("Return to MinValue Function")
+        # print("Vold : " + str(v[0]) + " : "  + str(v[1]))
+        # print("Vnew : " + str(v_new[0]) + " : "  + str(v_new[1]))
+        if (v_new[0] < v[0]):
+            v = v_new
+            if(v[0] == -1): #Stop at first win condition
+                return v
 
-    print("MinValue Function")
-    print("V : " + str(v))
-    print(board)
-    input()
+    
+    # print("V    : " + str(v[0]) + " : "  + str(v[1]))
+    # print(board[0])
+    # print(board[1])
+    # print(board[2])
+    # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    # input()
     return v
 
 def minimax(board):
@@ -169,67 +204,13 @@ def minimax(board):
     Returns the optimal action for the current player on the board.
     """
     currentPlayer = player(board) #if X maximize; if O minimize
+    print("Current player is : " + str(currentPlayer) + " : : " + str(currentPlayer == X))
+
     if(currentPlayer == X):
         v = maxValue(board)
     else:
         v = minValue(board)
-    print("Current player is : " + str(currentPlayer))
     print("V : " + str(v))
-    # start = Node(state=board, parent=None, action=None)
-    # frontier = QueueFrontier() #Find a win in the least number of moves from the current board.
-    # frontier.add(start)
 
-    # terminalNodes = set()
-    # loopcnt = 0
-    # while True:
-    #     print("Loop Count = " + str(loopcnt))
-    #     loopcnt = loopcnt + 1
-    #     print("Frontier Empty = " + str(frontier.empty()))
-    #     print("Frontier Length = " + str(len(frontier.frontier)))
-    #     if(frontier.empty()):
-    #         print("Frontier Empty")
-    #         Actions = actions(board)
-    #         return list(Actions)[0]
-    #         #find a node in terminalNodes that has a value of 0, no winning game was found
-        
-    #     node = frontier.remove()
-    #     currentPlayer = player(node.state) #if X maximize; if O minimize
-    #     if(terminal(node.state)):
-    #         print("Location Test : terminal(node.state)")
-    #         playerUtility = utility(node.state)
-    #         #If player X found a winning board return the required action, No need to continue searching
-    #         if(currentPlayer == X):
-    #             if(playerUtility == 1):
-    #                 bestAction = node.action
-    #                 print("Player X Optimal Action")
-    #                 return bestAction
-            
-    #         #If player O found a winning board return the required action, No need to continue searching
-    #         if(currentPlayer == O):
-    #             if(playerUtility == -1):
-    #                 bestAction = node.action
-    #                 print("Player O Optimal Action")
-    #                 return bestAction
-
-    #         #If no winning board is found add the terminal node to a list. We will want to find boards that are 0 if we don't find any winners.
-    #         #Because of breath first searching a winner that is found will be an optimal path, no need to store winning boards
-    #         terminalNodes.add(node)
-
-    #     else:
-    #         #if the game isn't over...            
-    #         #What turns are available? 
-    #         availableActions = actions(node.state)
-    #         #add the nodes to the frontier
-    #         for action in availableActions:
-    #             print("ACTION :")
-    #             print(action)
-    #             newBoard = result(node.state, action)
-    #             print("NEW BOARD :")
-    #             print(newBoard)
-    #             frontier.add(Node(state=newBoard, parent=node, action=action))
-                
-
-    Actions = actions(board)
-    print("Just got to a weird spot?")
-    return list(Actions)[0]
+    return v[1]
     # raise NotImplementedError
