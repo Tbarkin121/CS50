@@ -10,13 +10,19 @@ X = "X"
 O = "O"
 EMPTY = None
 Debug = False
-iterMax = 100
+iterMax = 10
 iterCount = 0
 
 def initial_state():
     """
     Returns starting state of the board.
     """
+    # return [[X, O, X],
+    #         [EMPTY, O, X],
+    #         [EMPTY, EMPTY, O]]
+    # return [[O, EMPTY, O],
+    #         [EMPTY, X, EMPTY],
+    #         [X, EMPTY, EMPTY]]
     return [[EMPTY, EMPTY, EMPTY],
             [EMPTY, EMPTY, EMPTY],
             [EMPTY, EMPTY, EMPTY]]
@@ -133,12 +139,21 @@ def utility(board):
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
     #if we have a winning board there is no reason to do the other stuff
-    Winner = winner(board)
-    if(Winner == X):
-        return 100 # 9 because 3 in a row squared 
-    if(Winner == O):
-        return -100
+    # Winner = winner(board)
+    # if(Winner == X):
+    #     return 100 # 9 because 3 in a row squared 
+    # if(Winner == O):
+    #     return -100
     # return 0
+
+    #Give advantage too the next player? 
+    Xbonus = 0
+    Obonus = 0
+    if (player(board) == X):
+        Xbonus = 1
+    else:
+        Obonus = 1
+
 
     rowCount = len(board)
     colCount = len(board[0])
@@ -159,10 +174,10 @@ def utility(board):
         # print("SumO : " + str(sumO))
         if(sumX != 0 and sumO == 0 ):
             # print("SumX_row = " + str(sumX))
-            laneUtility.append(pow(sumX,2))
+            laneUtility.append(pow(sumX,2+Xbonus))
         if(sumX == 0 and sumO != 0 ):
             # print("SumO_row = " + str(sumO))
-            laneUtility.append(-pow(sumO,2)) #NOTE THE NEGITIVE SIGN... this is gonna get me somehow
+            laneUtility.append(-pow(sumO,2+Obonus)) #NOTE THE NEGITIVE SIGN... this is gonna get me somehow
 
     # print("Checking Lane Utilities ROWS!!!!!")
     # print(laneUtility)   
@@ -180,10 +195,10 @@ def utility(board):
                 sumO = sumO+1
         if(sumX != 0 and sumO == 0 ):
             # print("SumX_col = " + str(sumX))
-            laneUtility.append(pow(sumX,2))
+            laneUtility.append(pow(sumX,2+Xbonus))
         if(sumX == 0 and sumO != 0 ):
             # print("SumO_col = " + str(sumO))
-            laneUtility.append(-pow(sumO,2))
+            laneUtility.append(-pow(sumO,2+Obonus))
 
     # print("Checking Lane Utilities COLS!!!!!")
     # print(laneUtility)   
@@ -201,10 +216,10 @@ def utility(board):
             sumO = sumO+1
     if(sumX != 0 and sumO == 0 ):
         # print("SumX_diagd = " + str(sumX))
-        laneUtility.append(pow(sumX,2))
+        laneUtility.append(pow(sumX,2+Xbonus))
     if(sumX == 0 and sumO != 0 ):
         # print("SumO_diagd = " + str(sumO))
-        laneUtility.append(-pow(sumO,2))
+        laneUtility.append(-pow(sumO,2+Obonus))
 
     diagUp = [board[2][0], board[1][1], board[0][2]]
     # print("Diag Up")
@@ -218,10 +233,10 @@ def utility(board):
             sumO = sumO+1
     if(sumX != 0 and sumO == 0 ):
         # print("SumX_diagu = " + str(sumX))
-        laneUtility.append(pow(sumX,2))
+        laneUtility.append(pow(sumX,2+Xbonus))
     if(sumX == 0 and sumO != 0 ):
         # print("SumO_diagu = " + str(sumO))
-        laneUtility.append(-pow(sumO,2))
+        laneUtility.append(-pow(sumO,2+Obonus))
 
     # print("Checking Lane Utilities Diags!!!!!")
     # print(laneUtility)
@@ -239,18 +254,17 @@ def utility(board):
 
 def maxValue(board):
     global iterCount
-    print("Board :")
-    printBoard(board)
+    
 
     v = Node(-math.inf, None, -math.inf, None) #value, est_value, action
 
     #If we hit a terminal board return the actual values
     if(terminal(board)):
-        print("Max Term Board End")
-        return Node(utility(board), v.action, None, None)
+        # print("Max Term Board End")
+        return Node(utility(board), v.action, utility(board), v.action)
     #If we hit a depth limit return the estimated values
     if(iterCount >= iterMax):
-        print("Max Iter Count End  " + str(iterCount))
+        # print("Max Iter Count End  " + str(iterCount))
         return Node(None, None, utility(board), v.action)
     iterCount += 1
     
@@ -273,9 +287,8 @@ def maxValue(board):
         v_new = minValue(result(board, action))
         
         #If we are here we've hit a return by either terminal or iterCount. If terminal then we should have a valid v_new.value. If not we can check the estimated board value next
-        # print("Max")
-        # print("Board :")
-        # printBoard(board)
+        # print("Max Board+action :")
+        # printBoard(result(board,action))
         # print("Action :")
         # print(action)
         # print("v_new      " + str(v_new.value))
@@ -284,15 +297,18 @@ def maxValue(board):
         # print("v est      " + str(v.estvalue))
         # input()
         # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        if (v_new.value is not None and v.value is not None):
+        if (v_new.value is not None and v.value is not None and abs(v_new.value) != math.inf):
             if (v_new.value > v.value):
-                v = v_new
+                # print("Setting term value")
+                v.value = v_new.value
                 v.action = action
-        if (v_new.estvalue is not None and v.estvalue is not None):
-            if ( (v_new.estvalue > v.estvalue) and v_new.estvalue > v.value):
-                print("Are we ever here?")
+                # input()
+        if (v_new.estvalue is not None and v.estvalue is not None and abs(v_new.estvalue) != math.inf):
+            if ( (v_new.estvalue > v.estvalue)):
+                # print("Setting est value")
                 v.estvalue = v_new.estvalue
                 v.estaction = action
+        # print("V = {" + str(v.value) + ", " + str(v.action) + ", " + str(v.estvalue) + ", " + str(v.estaction) + "}")
         # if(v.value == 100): #Stop at first win condition
         #     print("Found a Winning Game X")
         #     print(v.value)
@@ -304,18 +320,17 @@ def maxValue(board):
 
 def minValue(board):
     global iterCount
-    print("Board :")
-    printBoard(board)
+    
 
     v = Node(math.inf, None, math.inf, None) #value, est_value, action
 
     #If we hit a terminal board return the actual values
     if(terminal(board)):
-        print("Min Term Board End")
-        return Node(utility(board), v.action, None, None)
+        # print("Min Term Board End")
+        return Node(utility(board), v.action, utility(board), v.action)
     #If we hit a depth limit return the estimated values
     if(iterCount >= iterMax):
-        print("Min Iter Count End " + str(iterCount))
+        # print("Min Iter Count End " + str(iterCount))
         return Node(None, None, utility(board), v.action)
     iterCount += 1
     
@@ -340,9 +355,8 @@ def minValue(board):
         v_new = maxValue(result(board, action))
         
         #If we are here we've hit a return by either terminal or iterCount. If terminal then we should have a valid v_new.value. If not we can check the estimated board value next
-        # print("min")
-        # print("Board :")
-        # printBoard(board)
+        # print("Min Board+action :")
+        # printBoard(result(board,action))
         # print("Action :")
         # print(action)
         # print("v_new      " + str(v_new.value))
@@ -351,15 +365,18 @@ def minValue(board):
         # print("v est      " + str(v.estvalue))
         # input()
         # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        if (v_new.value is not None and v.value is not None):
+        if (v_new.value is not None and v.value is not None and abs(v_new.value) != math.inf):
             if (v_new.value < v.value):
-                v = v_new
+                # print("Setting term value")
+                v.value = v_new.value
                 v.action = action
+                # input()
         if (v_new.estvalue is not None and v.estvalue is not None):
             if ( (v_new.estvalue < v.estvalue) and v_new.estvalue < v.value):
-                print("Are we ever here?")
+                # print("Setting est value")
                 v.estvalue = v_new.estvalue
                 v.estaction = action
+        # print("V = {" + str(v.value) + ", " + str(v.action) + ", " + str(v.estvalue) + ", " + str(v.estaction) + "}")
         # if(v.value == -100): #Stop at first win condition
         #     print("Found a Winning Game O")
         #     return v
@@ -373,22 +390,35 @@ def minimax(board):
     global iterCount
     iterCount = 0
     currentPlayer = player(board) #if X maximize; if O minimize
-    print("Current player is : " + str(currentPlayer))
+    # print("Current player is : " + str(currentPlayer))
 
     if(currentPlayer == X):
         v = maxValue(board)
     else:
         v = minValue(board)
-    print("v.value " + str(v.value))
-    print("v.action " + str(v.action))
-    print("v.estvalue " + str(v.estvalue))
-    print("v.estaction " + str(v.estaction))
+    # print(" ")
+    # print("v.value " + str(v.value))
+    # print("v.action " + str(v.action))
+    # print("v.estvalue " + str(v.estvalue))
+    # print("v.estaction " + str(v.estaction))
 
     if(v.action is not None):
-        print("Using Term Value")
-        return v.action
+        if(currentPlayer == X):
+            if(v.value >= v.estvalue):
+                # print("Using Term Value MAX")
+                return v.action
+            else:
+                # print("Using Est Value MAX")
+                return v.estaction
+        else:
+            if(v.value <= v.estvalue):
+                # print("Using Term Value MIN")
+                return v.action
+            else:
+                # print("Using Est Value MIN")
+                return v.estaction
     else:
-        print("Using Est Value")
+        # print("Using Est Value, no terminal value available")
         return v.estaction
     # raise NotImplementedError
 
