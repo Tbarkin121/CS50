@@ -10,6 +10,8 @@ X = "X"
 O = "O"
 EMPTY = None
 Debug = False
+iterMax = 100
+iterCount = 0
 
 def initial_state():
     """
@@ -133,140 +135,234 @@ def utility(board):
     #if we have a winning board there is no reason to do the other stuff
     Winner = winner(board)
     if(Winner == X):
-        return 1 # 9 because 3 in a row squared 
+        return 100 # 9 because 3 in a row squared 
     if(Winner == O):
-        return -1
-    return 0
+        return -100
+    # return 0
 
-    # rowCount = len(board)
-    # colCount = len(board[0])
-    # utility = 0
-    # laneUtility = set() #Lane utility gives a score to each lane : Utility = sum(X^2) - sum(O^2)
-    # # Checking Rows
-    # for rows in board:
-    #     sumX = 0
-    #     sumO = 0
-    #     for ele in rows:
-    #         if(ele == X):
-    #             sumX = sumX+1
-    #         if(ele == O):
-    #             sumO = sumO+1
-    #     printBoard(board)
-    #     print("SumX : " + str(sumX))
-    #     print("SumO : " + str(sumO))
-    #     if(sumX != 0 and sumO == 0 ):
-    #         laneUtility.add(sumX^2)
-    #     if(sumX == 0 and sumO != 0 ):
-    #         laneUtility.add(-(sumO^2)) #NOTE THE NEGITIVE SIGN... this is gonna get me somehow
-
+    rowCount = len(board)
+    colCount = len(board[0])
+    utility = 0
+    laneUtility = [] #Lane utility gives a score to each lane : Utility = sum(X^2) - sum(O^2)
+    # Checking Rows
+    # printBoard(board)
+    for rows in board:
+        sumX = 0
+        sumO = 0
+        for ele in rows:
+            if(ele == X):
+                sumX = sumX+1
+            if(ele == O):
+                sumO = sumO+1
         
-    # # Checking Cols
-    # for j in range(colCount):
-    #     cols = [board[0][j], board[1][j], board[2][j]]
-    #     sumX = 0
-    #     sumO = 0
-    #     for ele in cols:
-    #         if(ele == X):
-    #             sumX = sumX+1
-    #         if(ele == O):
-    #             sumO = sumO+1
-    #     if(sumX != 0 and sumO == 0 ):
-    #         laneUtility.add(sumX^2)
-    #     if(sumX == 0 and sumO != 0 ):
-    #         laneUtility.add(-(sumO^2)) 
+        # print("SumX : " + str(sumX))
+        # print("SumO : " + str(sumO))
+        if(sumX != 0 and sumO == 0 ):
+            # print("SumX_row = " + str(sumX))
+            laneUtility.append(pow(sumX,2))
+        if(sumX == 0 and sumO != 0 ):
+            # print("SumO_row = " + str(sumO))
+            laneUtility.append(-pow(sumO,2)) #NOTE THE NEGITIVE SIGN... this is gonna get me somehow
 
-    # # Check Diags
-    # diagDown = [board[0][0], board[1][1], board[2][2]]
-    # for ele in diagDown:
-    #     if(ele == X):
-    #         sumX = sumX+1
-    #     if(ele == O):
-    #         sumO = sumO+1
-    # if(sumX != 0 and sumO == 0 ):
-    #     laneUtility.add(sumX^2)
-    # if(sumX == 0 and sumO != 0 ):
-    #     laneUtility.add(-(sumO^2)) 
+    # print("Checking Lane Utilities ROWS!!!!!")
+    # print(laneUtility)   
+    # Checking Cols
+    for j in range(colCount):
+        cols = [board[0][j], board[1][j], board[2][j]]
+        # print("cols")
+        # print(cols)
+        sumX = 0
+        sumO = 0
+        for ele in cols:
+            if(ele == X):
+                sumX = sumX+1
+            if(ele == O):
+                sumO = sumO+1
+        if(sumX != 0 and sumO == 0 ):
+            # print("SumX_col = " + str(sumX))
+            laneUtility.append(pow(sumX,2))
+        if(sumX == 0 and sumO != 0 ):
+            # print("SumO_col = " + str(sumO))
+            laneUtility.append(-pow(sumO,2))
 
-    # diagUp = [board[2][0], board[1][1], board[0][2]]
-    # for ele in diagUp:
-    #     if(ele == X):
-    #         sumX = sumX+1
-    #     if(ele == O):
-    #         sumO = sumO+1
-    # if(sumX != 0 and sumO == 0 ):
-    #     laneUtility.add(sumX^2)
-    # if(sumX == 0 and sumO != 0 ):
-    #     laneUtility.add(-(sumO^2)) 
-    # print("Checking Lane Utilities!!!!!")
+    # print("Checking Lane Utilities COLS!!!!!")
+    # print(laneUtility)   
+
+    # Check Diags
+    diagDown = [board[0][0], board[1][1], board[2][2]]
+    # print("Diag Down")
+    # print(diagDown)
+    sumX = 0
+    sumO = 0
+    for ele in diagDown:
+        if(ele == X):
+            sumX = sumX+1
+        if(ele == O):
+            sumO = sumO+1
+    if(sumX != 0 and sumO == 0 ):
+        # print("SumX_diagd = " + str(sumX))
+        laneUtility.append(pow(sumX,2))
+    if(sumX == 0 and sumO != 0 ):
+        # print("SumO_diagd = " + str(sumO))
+        laneUtility.append(-pow(sumO,2))
+
+    diagUp = [board[2][0], board[1][1], board[0][2]]
+    # print("Diag Up")
+    # print(diagUp)
+    sumX = 0
+    sumO = 0
+    for ele in diagUp:
+        if(ele == X):
+            sumX = sumX+1
+        if(ele == O):
+            sumO = sumO+1
+    if(sumX != 0 and sumO == 0 ):
+        # print("SumX_diagu = " + str(sumX))
+        laneUtility.append(pow(sumX,2))
+    if(sumX == 0 and sumO != 0 ):
+        # print("SumO_diagu = " + str(sumO))
+        laneUtility.append(-pow(sumO,2))
+
+    # print("Checking Lane Utilities Diags!!!!!")
     # print(laneUtility)
-    # boardUtility = 0
-    # for ele in laneUtility:
-    #     boardUtility = boardUtility + ele
+    
+    boardUtility = 0
+    for ele in laneUtility:
+        boardUtility += ele
     # print("Checking Board Utilities!!!!!")
     # print(boardUtility)
     # input()
-    # return boardUtility
+    return boardUtility
 
-    
-    
-        
+
     # raise NotImplementedError
 
 def maxValue(board):
+    global iterCount
+    print("Board :")
+    printBoard(board)
 
-    v = (-math.inf, None) #value and action
+    v = Node(-math.inf, None, -math.inf, None) #value, est_value, action
 
+    #If we hit a terminal board return the actual values
     if(terminal(board)):
-        return (utility(board), v[1])
+        print("Max Term Board End")
+        return Node(utility(board), v.action, None, None)
+    #If we hit a depth limit return the estimated values
+    if(iterCount >= iterMax):
+        print("Max Iter Count End  " + str(iterCount))
+        return Node(None, None, utility(board), v.action)
+    iterCount += 1
+    
+    # #if the center is open take it. I just feel like this is a good strat since board score is trinary
+    # if (1,1) in actions(board):
+    #     v_new = maxValue(result(board, (1,1)))
 
-
-    #if the center is open take it. I just feel like this is a good strat since board score is trinary
-    if (1,1) in actions(board):
-        v_new = (max(v[0],minValue(result(board, (1,1)))[0]), (1,1))
-
-        if (v_new[0] > v[0]):
-            v = v_new
-
-        if(v[0] == 1): #Stop at first win condition
-            return v
+    #     if (v_new.value is not None and v.value is not None):
+    #         if (v_new.value > v.value):
+    #             v = v_new
+    #             v.action = (1,1)
+    #     elif (v_new.estvalue is not None and v.estvalue is not None):
+    #         if ( (v_new.estvalue > v.estvalue)):
+    #             v = v_new
+    #             v.estaction = (1,1)
+    #     if(v.value == 100): #Stop at first win condition
+    #         return v
 
     for action in actions(board):
-        v_new = (max(v[0],minValue(result(board, action))[0]), action)
-
-        if (v_new[0] > v[0]):
-            v = v_new
-
-        if(v[0] == 1): #Stop at first win condition
-            return v
+        v_new = minValue(result(board, action))
+        
+        #If we are here we've hit a return by either terminal or iterCount. If terminal then we should have a valid v_new.value. If not we can check the estimated board value next
+        # print("Max")
+        # print("Board :")
+        # printBoard(board)
+        # print("Action :")
+        # print(action)
+        # print("v_new      " + str(v_new.value))
+        # print("v          " + str(v.value))
+        # print("v_new est  " + str(v_new.estvalue))
+        # print("v est      " + str(v.estvalue))
+        # input()
+        # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        if (v_new.value is not None and v.value is not None):
+            if (v_new.value > v.value):
+                v = v_new
+                v.action = action
+        if (v_new.estvalue is not None and v.estvalue is not None):
+            if ( (v_new.estvalue > v.estvalue) and v_new.estvalue > v.value):
+                print("Are we ever here?")
+                v.estvalue = v_new.estvalue
+                v.estaction = action
+        # if(v.value == 100): #Stop at first win condition
+        #     print("Found a Winning Game X")
+        #     print(v.value)
+        #     print(" ")
+        #     return v
 
     return v
 
+
 def minValue(board):
-    v = (math.inf, None) #value and action
+    global iterCount
+    print("Board :")
+    printBoard(board)
 
+    v = Node(math.inf, None, math.inf, None) #value, est_value, action
+
+    #If we hit a terminal board return the actual values
     if(terminal(board)):
-        return (utility(board), v[1])
-
+        print("Min Term Board End")
+        return Node(utility(board), v.action, None, None)
+    #If we hit a depth limit return the estimated values
+    if(iterCount >= iterMax):
+        print("Min Iter Count End " + str(iterCount))
+        return Node(None, None, utility(board), v.action)
+    iterCount += 1
     
-    #if the center is open take it. I just feel like this is a good strat since board score is trinary
-    if (1,1) in actions(board):
+    # #if the center is open take it. I just feel like this is a good strat since board score is trinary
+    # if (1,1) in actions(board):
+    #     v_new = maxValue(result(board, (1,1))) #This is the recursive part of the function
+        
 
-        v_new = (min(v[0],maxValue(result(board, (1,1)))[0]), (1,1))
-
-        if (v_new[0] < v[0]):
-            v = v_new
-
-        if(v[0] == -1): #Stop at first win condition
-            return v
+    #     #If we are here we've hit a return by either terminal or iterCount. If terminal then we should have a valid v_new.value. If not we can check the estimated board value next
+    #     if (v_new.value is not None and v.value is not None):
+    #         if (v_new.value < v.value): #This is the min part of the function
+    #             v = v_new
+    #             v.action = (1,1)
+    #     elif (v_new.estvalue is not None and v.estvalue is not None):
+    #         if ( (v_new.estvalue < v.estvalue)):
+    #             v = v_new
+    #             v.estaction = (1,1)
+    #     if(v.value == -100): #Stop at first win condition
+    #         return v
 
     for action in actions(board):
-        v_new = (min(v[0],maxValue(result(board, action))[0]), action)
-
-        if (v_new[0] < v[0]):
-            v = v_new
-
-        if(v[0] == -1): #Stop at first win condition
-            return v
+        v_new = maxValue(result(board, action))
+        
+        #If we are here we've hit a return by either terminal or iterCount. If terminal then we should have a valid v_new.value. If not we can check the estimated board value next
+        # print("min")
+        # print("Board :")
+        # printBoard(board)
+        # print("Action :")
+        # print(action)
+        # print("v_new      " + str(v_new.value))
+        # print("v          " + str(v.value))
+        # print("v_new est  " + str(v_new.estvalue))
+        # print("v est      " + str(v.estvalue))
+        # input()
+        # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        if (v_new.value is not None and v.value is not None):
+            if (v_new.value < v.value):
+                v = v_new
+                v.action = action
+        if (v_new.estvalue is not None and v.estvalue is not None):
+            if ( (v_new.estvalue < v.estvalue) and v_new.estvalue < v.value):
+                print("Are we ever here?")
+                v.estvalue = v_new.estvalue
+                v.estaction = action
+        # if(v.value == -100): #Stop at first win condition
+        #     print("Found a Winning Game O")
+        #     return v
 
     return v
 
@@ -274,17 +370,26 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
+    global iterCount
+    iterCount = 0
     currentPlayer = player(board) #if X maximize; if O minimize
-
-    print("Current player is : " + str(currentPlayer) + " : : " + str(currentPlayer == X))
+    print("Current player is : " + str(currentPlayer))
 
     if(currentPlayer == X):
         v = maxValue(board)
     else:
         v = minValue(board)
-    print("V : " + str(v))
+    print("v.value " + str(v.value))
+    print("v.action " + str(v.action))
+    print("v.estvalue " + str(v.estvalue))
+    print("v.estaction " + str(v.estaction))
 
-    return v[1]
+    if(v.action is not None):
+        print("Using Term Value")
+        return v.action
+    else:
+        print("Using Est Value")
+        return v.estaction
     # raise NotImplementedError
 
 def printBoard(board):

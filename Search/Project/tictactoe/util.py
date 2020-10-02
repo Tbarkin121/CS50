@@ -1,8 +1,9 @@
 class Node():
-    def __init__(self, value, estvalue, action):
+    def __init__(self, value, action, estvalue, estaction):
         self.value = value
-        self.estvalue = estvalue
         self.action = action
+        self.estvalue = estvalue
+        self.estaction = estaction
         
 
 
