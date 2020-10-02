@@ -4,11 +4,12 @@ Tic Tac Toe Player
 
 import math
 from copy import copy, deepcopy
+from util import Node
 
 X = "X"
 O = "O"
 EMPTY = None
-
+Debug = False
 
 def initial_state():
     """
@@ -129,74 +130,144 @@ def utility(board):
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
+    #if we have a winning board there is no reason to do the other stuff
     Winner = winner(board)
     if(Winner == X):
-        return 1
+        return 1 # 9 because 3 in a row squared 
     if(Winner == O):
         return -1
     return 0
+
+    # rowCount = len(board)
+    # colCount = len(board[0])
+    # utility = 0
+    # laneUtility = set() #Lane utility gives a score to each lane : Utility = sum(X^2) - sum(O^2)
+    # # Checking Rows
+    # for rows in board:
+    #     sumX = 0
+    #     sumO = 0
+    #     for ele in rows:
+    #         if(ele == X):
+    #             sumX = sumX+1
+    #         if(ele == O):
+    #             sumO = sumO+1
+    #     printBoard(board)
+    #     print("SumX : " + str(sumX))
+    #     print("SumO : " + str(sumO))
+    #     if(sumX != 0 and sumO == 0 ):
+    #         laneUtility.add(sumX^2)
+    #     if(sumX == 0 and sumO != 0 ):
+    #         laneUtility.add(-(sumO^2)) #NOTE THE NEGITIVE SIGN... this is gonna get me somehow
+
+        
+    # # Checking Cols
+    # for j in range(colCount):
+    #     cols = [board[0][j], board[1][j], board[2][j]]
+    #     sumX = 0
+    #     sumO = 0
+    #     for ele in cols:
+    #         if(ele == X):
+    #             sumX = sumX+1
+    #         if(ele == O):
+    #             sumO = sumO+1
+    #     if(sumX != 0 and sumO == 0 ):
+    #         laneUtility.add(sumX^2)
+    #     if(sumX == 0 and sumO != 0 ):
+    #         laneUtility.add(-(sumO^2)) 
+
+    # # Check Diags
+    # diagDown = [board[0][0], board[1][1], board[2][2]]
+    # for ele in diagDown:
+    #     if(ele == X):
+    #         sumX = sumX+1
+    #     if(ele == O):
+    #         sumO = sumO+1
+    # if(sumX != 0 and sumO == 0 ):
+    #     laneUtility.add(sumX^2)
+    # if(sumX == 0 and sumO != 0 ):
+    #     laneUtility.add(-(sumO^2)) 
+
+    # diagUp = [board[2][0], board[1][1], board[0][2]]
+    # for ele in diagUp:
+    #     if(ele == X):
+    #         sumX = sumX+1
+    #     if(ele == O):
+    #         sumO = sumO+1
+    # if(sumX != 0 and sumO == 0 ):
+    #     laneUtility.add(sumX^2)
+    # if(sumX == 0 and sumO != 0 ):
+    #     laneUtility.add(-(sumO^2)) 
+    # print("Checking Lane Utilities!!!!!")
+    # print(laneUtility)
+    # boardUtility = 0
+    # for ele in laneUtility:
+    #     boardUtility = boardUtility + ele
+    # print("Checking Board Utilities!!!!!")
+    # print(boardUtility)
+    # input()
+    # return boardUtility
+
+    
+    
         
     # raise NotImplementedError
 
 def maxValue(board):
-    # print("")
-    # print("MaxValue Function")
-    # print("Input Board = ")
-    # print(board[0])
-    # print(board[1])
-    # print(board[2])
+
     v = (-math.inf, None) #value and action
+
     if(terminal(board)):
-        # print("Terminal Board")
         return (utility(board), v[1])
-    for action in actions(board):
-        # print("Trying Action " + str(action))
-        v_new = (max(v[0],minValue(result(board, action))[0]), action)
-        # print("Return to MaxValue Function")
-        # print("Vold : " + str(v[0]) + " : "  + str(v[1]))
-        # print("Vnew : " + str(v_new[0]) + " : "  + str(v_new[1]))
+
+
+    #if the center is open take it. I just feel like this is a good strat since board score is trinary
+    if (1,1) in actions(board):
+        v_new = (max(v[0],minValue(result(board, (1,1)))[0]), (1,1))
+
         if (v_new[0] > v[0]):
             v = v_new
-            if(v[0] == 1): #Stop at first win condition
-                return v
-    
-    # print("V    : " + str(v[0]) + " : "  + str(v[1]))
-    # print(board[0])
-    # print(board[1])
-    # print(board[2])
-    # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    # input()
+
+        if(v[0] == 1): #Stop at first win condition
+            return v
+
+    for action in actions(board):
+        v_new = (max(v[0],minValue(result(board, action))[0]), action)
+
+        if (v_new[0] > v[0]):
+            v = v_new
+
+        if(v[0] == 1): #Stop at first win condition
+            return v
+
     return v
 
 def minValue(board):
-    # print("")
-    # print("MinValue Function")
-    # print("Input Board = ")
-    # print(board[0])
-    # print(board[1])
-    # print(board[2])
     v = (math.inf, None) #value and action
+
     if(terminal(board)):
-        # print("Terminal Board")
         return (utility(board), v[1])
-    for action in actions(board):
-        # print("Trying Action " + str(action))
-        v_new = (min(v[0],maxValue(result(board, action))[0]), action)
-        # print("Return to MinValue Function")
-        # print("Vold : " + str(v[0]) + " : "  + str(v[1]))
-        # print("Vnew : " + str(v_new[0]) + " : "  + str(v_new[1]))
-        if (v_new[0] < v[0]):
-            v = v_new
-            if(v[0] == -1): #Stop at first win condition
-                return v
 
     
-    # print("V    : " + str(v[0]) + " : "  + str(v[1]))
-    # print(board[0])
-    # print(board[1])
-    # print(board[2])
-    # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    # input()
+    #if the center is open take it. I just feel like this is a good strat since board score is trinary
+    if (1,1) in actions(board):
+
+        v_new = (min(v[0],maxValue(result(board, (1,1)))[0]), (1,1))
+
+        if (v_new[0] < v[0]):
+            v = v_new
+
+        if(v[0] == -1): #Stop at first win condition
+            return v
+
+    for action in actions(board):
+        v_new = (min(v[0],maxValue(result(board, action))[0]), action)
+
+        if (v_new[0] < v[0]):
+            v = v_new
+
+        if(v[0] == -1): #Stop at first win condition
+            return v
+
     return v
 
 def minimax(board):
@@ -204,6 +275,7 @@ def minimax(board):
     Returns the optimal action for the current player on the board.
     """
     currentPlayer = player(board) #if X maximize; if O minimize
+
     print("Current player is : " + str(currentPlayer) + " : : " + str(currentPlayer == X))
 
     if(currentPlayer == X):
@@ -214,3 +286,8 @@ def minimax(board):
 
     return v[1]
     # raise NotImplementedError
+
+def printBoard(board):
+    print(board[0])
+    print(board[1])
+    print(board[2])

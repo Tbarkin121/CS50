@@ -1,7 +1,9 @@
 class Node():
-    def __init__(self, action, value):
-        self.action = action
+    def __init__(self, value, estvalue, action):
         self.value = value
+        self.estvalue = estvalue
+        self.action = action
+        
 
 
 class StackFrontier():
