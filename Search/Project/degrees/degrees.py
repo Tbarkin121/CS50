@@ -96,6 +96,7 @@ def shortest_path(source, target):
     start = Node(state=source, parent=None, action=None)
     end = Node(state=target, parent=None, action=None) 
     frontier = QueueFrontier()
+    # frontier = StackFrontier()
     frontier.add(start)
 
     # Initialize an empty explored set
@@ -110,26 +111,38 @@ def shortest_path(source, target):
 
         # Choose a node from the frontier
         node = frontier.remove()
+        # print("Person of interest : " + str(node.state))
         num_explored += 1
-        
-        # If node is the goal, then we have a solution
-        if node.state == end.state:
-            path = []
-            while node.parent is not None:
-                path = [(node.action, node.state)] + path
-                node = node.parent
-            return path
+        # print(num_explored)
+
 
         # # Mark node as explored
+        # print("Node.action = " + str(node.action))
         explored.add(node.action)
-
+        # print("Explored")
+        # print(explored)
         # # Add neighbors to frontier
         neighbors = neighbors_for_person(node.state)
+        # print("Neighbors : ")
+        # print(neighbors)
         for movie, person in neighbors:
             if not frontier.contains_state(person) and movie not in explored:
-                child = Node(state=person, parent=node, action=movie)
-                frontier.add(child)
+                frontier.add(Node(state=person, parent=node, action=movie))
 
+        # If target is on the frontier list, we have a solution
+        # print("Frontier Start")
+        # frontier.print_frontier()
+        # print("Frontier End")
+        if frontier.contains_state(end.state):
+            target_node = frontier.return_state(target)
+            path = []
+            while target_node.parent is not None:
+                path = [(target_node.action, target_node.state)] + path
+                target_node = target_node.parent
+            return path
+
+        if(num_explored > 1000):
+            return None
 
 
 def person_id_for_name(name):
