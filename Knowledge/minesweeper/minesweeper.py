@@ -295,6 +295,10 @@ class MinesweeperAI():
             if(not Modified_Knowledgebase):
 
                 print("Nothing New To Add")
+                print("Save Cells : ")
+                print(self.safes)
+                print("Mine Cells : ")
+                print(self.mines)
                 print("~~~~~~~~~~~~~~~~~~~")
                 break
 
@@ -342,7 +346,7 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        print(self.safes)
+        
         for move in self.safes:
             if(move not in self.moves_made):
                 print("Safe New Move :")
