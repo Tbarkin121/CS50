@@ -24,11 +24,9 @@ class Minesweeper():
             self.board.append(row)
 
         # Add mines randomly
-        print("Mine Locations")
         while len(self.mines) != mines:
             i = random.randrange(height)
             j = random.randrange(width)
-            print((i,j))
             if not self.board[i][j]:
                 self.mines.add((i, j))
                 self.board[i][j] = True
@@ -211,14 +209,19 @@ class MinesweeperAI():
             if (i >= 0 and i < self.height):                         #Checks if indice is on the board
                 for j in range(-1 + cell[1], 2 + cell[1]):      # (-1, 0, 1) + cell[1]
                     if (j >= 0 and j < self.width):                  #Checks if indice is on the board
-                        new_cell = (i, j)
-                        if ( (new_cell not in self.mines) and (new_cell not in self.safes) ):
-                            new_cells.add(new_cell)
+                        new_cells.add((i, j))
+                        # if ( (new_cell not in self.mines) and (new_cell not in self.safes) ):
+        mine_intersection = new_cells.intersection(self.mines)
+        safe_intersection = new_cells.intersection(self.safes)
         
         # print(new_cells)
-        new_sentence = Sentence(new_cells, count)
-        self.knowledge.append(new_sentence)
-        
+        if(len(new_cells) > 0):
+            new_sentence = Sentence(new_cells.difference(mine_intersection).difference(safe_intersection), count - len(mine_intersection))
+            self.knowledge.append(new_sentence)
+        print("Knowledge Base with New Sentence")
+        for idx in range(len(self.knowledge)):
+            print(self.knowledge[idx])
+
         max_iter = 5
         iter = 0
         while(True):
@@ -229,27 +232,28 @@ class MinesweeperAI():
             Modified_Knowledgebase = False
             for i in range(len(self.knowledge)):
                 safe_cells = deepcopy(self.knowledge[i].known_safes())
+                if(len(safe_cells) > 0):
+                    print("Safe Cells : ")
+                    print(safe_cells)
                 for ele in safe_cells:
-                    print("Safe Cell : ")
-                    print(ele)
                     self.mark_safe(ele)
                     Modified_Knowledgebase = True
-                    for idx in range(len(self.knowledge)):
-                        print(self.knowledge[idx])
 
                 mine_cells = deepcopy(self.knowledge[i].known_mines())
+                if(len(mine_cells) != 0):
+                    print("Mine Cells : ")
+                    print(mine_cells)
                 for ele in mine_cells:
-                    print("Mine Cell : ")
-                    print(ele)
                     self.mark_mine(ele)
                     Modified_Knowledgebase = True
-                    for idx in range(len(self.knowledge)):
-                        print(self.knowledge[idx])
+                
 
             #removing empty sets from the knowledge base that resulted from mine and safe cells being removed
             while Sentence(set(), 0) in self.knowledge:
                 self.knowledge.remove(Sentence(set(), 0))
-
+            print("Updated Knowledge Base (Removed Safe, Mines, and Empty Sets)")
+            for idx in range(len(self.knowledge)):
+                print(self.knowledge[idx])
 
             print("Check the knowledge for new inferences")
             inferred_sentences = []
@@ -266,9 +270,7 @@ class MinesweeperAI():
                             self.knowledge[j].count = 0
                         
                         elif (self.knowledge[j].cells.issubset(self.knowledge[i].cells) and len(self.knowledge[j].cells)>0 ):
-                            inferred_sentence = Sentence(self.knowledge[i].cells, self.knowledge[i].count - self.knowledge[j].count)
-                            for ele in self.knowledge[j].cells:
-                                inferred_sentence.cells.remove(ele)
+                            inferred_sentence = Sentence(self.knowledge[i].cells.difference(self.knowledge[j].cells), self.knowledge[i].count - self.knowledge[j].count)
                             if (inferred_sentence not in self.knowledge):
                                 inferred_sentences.append(inferred_sentence)
                                 print("Found an inference :")
@@ -278,25 +280,17 @@ class MinesweeperAI():
                 self.knowledge.remove(Sentence(set(), 0))
 
             
-
             
-            print("Printing Knowledge Base")
-            for ele in self.knowledge:
-                print(ele)
-            print("Printing Inferred Sentences")
             for ele in inferred_sentences:
-                print(ele)
-                if ele not in self.knowledge:
-                    self.knowledge.append(ele)
-                    Modified_Knowledgebase = True
+                self.knowledge.append(ele)
+                Modified_Knowledgebase = True
                     
-            print("~~~~~~~~~~~~~~~~~~~")
             # input()
             if(not Modified_Knowledgebase):
 
                 print("Nothing New To Add")
                 print("Save Cells : ")
-                print(self.safes)
+                print(self.safes.difference(self.moves_made))
                 print("Mine Cells : ")
                 print(self.mines)
                 print("~~~~~~~~~~~~~~~~~~~")
@@ -346,13 +340,14 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        
-        for move in self.safes:
-            if(move not in self.moves_made):
-                print("Safe New Move :")
-                print(move)
-                print("")
-                return move
+        safe_moves = self.safes.difference(self.moves_made)
+        print("Safe New Moves :")
+        print(safe_moves)
+        if (len(safe_moves) > 0):
+            safe_move = random.sample(safe_moves, 1)
+            return safe_move[0]
+        else:
+            return None
 
         # raise NotImplementedError
 
@@ -363,15 +358,20 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        while(True):
-            move = ( random.randint(0,self.height-1), random.randint(0,self.width-1) )
-            print("Testing Random Move : ")
-            print(move)
-            print("")
-            if ( (move not in self.mines) and (move not in self.moves_made) ):
-                print("Random New Move :")
-                print(move)
-                print("")
-                return move
+        print("Mines?")
+        print(self.mines)
+        # input()
+        all_moves = set()
+        for i in range(self.height):
+            for j in range(self.width):
+                all_moves.add((i,j))
+        random_moves = all_moves.difference(self.mines).difference(self.safes)
+        print("Random Moves?")
+        print(random_moves)
+        if (len(random_moves) > 0):
+            random_move = random.sample(random_moves, 1)
+            return random_move[0]
+        else:
+            return None
 
         # raise NotImplementedError
