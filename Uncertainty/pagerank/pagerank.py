@@ -92,10 +92,25 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
+    # Init visits dictionary
+    visits = {}
+    page_rank = {}
+    for page in corpus:
+        visits[page] = 0
+        page_rank[page] = 0
+        # transition_model(corpus, pages, damping_factor)
+    
+    test_page = random.choice(list(corpus))
+    for loop in range(n):
+        visits[test_page] += 1
+        transitionModel = transition_model(corpus, test_page, damping_factor)
+        test_page = random.choices(list(transitionModel), weights=transitionModel.values(), k=1)[0]
 
-    for pages in corpus:
-        transition_model(corpus, pages, damping_factor)
-    raise NotImplementedError
+    for page in corpus:
+        page_rank[page] = visits[page]/n
+
+    return page_rank
+
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -107,7 +122,27 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    page_rank = {}
+    old_page_rank = {}
+    rank_diff = {}
+    print(corpus)
+    for page in corpus:
+        page_rank[page] = 1/len(corpus)
+        old_page_rank[page] = 0
+    while(True):
+        for p in corpus: #updating page i
+            page_rank[p] = (1-damping_factor)/len(corpus)
+            for i in corpus: #checking for links against all other pages
+                if (p in corpus[i]):
+                    page_rank[p] += damping_factor*page_rank[i]/len(corpus[i])
+        for page in page_rank:
+            rank_diff[page] = abs(page_rank[page] - old_page_rank[page])
+        old_page_rank = page_rank.copy()
+
+        if (max(rank_diff.values()) < 0.0001 ):
+            return page_rank     
+    
+     # raise NotImplementedError
 
 
 if __name__ == "__main__":
