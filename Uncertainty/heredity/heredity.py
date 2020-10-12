@@ -1,6 +1,7 @@
 import csv
 import itertools
 import sys
+import numpy
 
 PROBS = {
 
@@ -139,7 +140,143 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    raise NotImplementedError
+    # print("People Dict")
+    # print(people)
+    peopleSet = set()
+    for person in people:
+        peopleSet.add(person)
+    no_gene = peopleSet.difference(one_gene).difference(two_genes)
+    no_trait = peopleSet.difference(have_trait)
+
+    # print("No Genes")
+    # print(no_gene)
+    # print("One Gene")
+    # print(one_gene)
+    # print("Two Genes")
+    # print(two_genes)
+
+    # print("No Trait")
+    # print(no_trait)
+    # print("Have Trait")
+    # print(have_trait)
+    # print("~~~~~~~~~~~~~~")
+    individual_prob = {}
+    for person in people:
+        # if (person not in have_trait):
+
+        if( (people[person]["mother"] == None) or (people[person]["father"] == None) ):
+            # print("Parents Unknown")
+            # print(people[person])
+            # print("PROBS[gene][0]")
+            # print(PROBS["gene"][0])
+            # print("PROBS[trait][0][false]")
+            # print(PROBS["trait"][0][person in have_trait])
+            # print(person + "prob :")
+            if person in no_gene:
+                individual_prob[person] = PROBS["gene"][0]*PROBS["trait"][0][person in have_trait]
+            elif person in one_gene:
+                individual_prob[person] = PROBS["gene"][1]*PROBS["trait"][1][person in have_trait]
+            elif person in two_genes:
+                individual_prob[person] = PROBS["gene"][2]*PROBS["trait"][2][person in have_trait]
+            else:
+                print("Gene Error!")
+            
+            # print(individual_prob)
+            # print("~~~~~~~~~~~~~~")
+        # else:
+            # print("Parents Known, Find parent probability first")
+
+        # if(people[person]["trait"] == None):
+            # print("Trait Unknown")
+
+    for person in people:
+        # print("Checking " + person)
+        if( (people[person]["mother"] != None) or (people[person]["father"] != None) ):
+            # print(person + " has parents")
+            if(person in no_gene):
+                individual_prob[person] = PROBS["trait"][0][person in have_trait]
+
+                if (people[person]["mother"] in no_gene and (people[person]["father"] in no_gene)):
+                    individual_prob[person] *= (1-PROBS["mutation"])*(1-PROBS["mutation"])
+                if (people[person]["mother"] in one_gene and (people[person]["father"] in no_gene)):
+                    individual_prob[person] *= (0.5)*(1-PROBS["mutation"])
+                if (people[person]["mother"] in two_genes and (people[person]["father"] in no_gene)):
+                    individual_prob[person] *= (PROBS["mutation"])*(1-PROBS["mutation"])
+
+                if (people[person]["mother"] in no_gene and (people[person]["father"] in one_gene)):
+                    individual_prob[person] *= (1-PROBS["mutation"])*(0.5)
+                if (people[person]["mother"] in one_gene and (people[person]["father"] in one_gene)):
+                    individual_prob[person] *= (0.5)*(0.5)
+                if (people[person]["mother"] in two_genes and (people[person]["father"] in one_gene)):
+                    individual_prob[person] *= (PROBS["mutation"])*(0.5)
+
+                if (people[person]["mother"] in no_gene and (people[person]["father"] in two_genes)):
+                    individual_prob[person] *= (1-PROBS["mutation"])*(PROBS["mutation"])
+                if (people[person]["mother"] in one_gene and (people[person]["father"] in two_genes)):
+                    individual_prob[person] *= (0.5)*(PROBS["mutation"])
+                if (people[person]["mother"] in two_genes and (people[person]["father"] in two_genes)):
+                    individual_prob[person] *= (PROBS["mutation"])*(PROBS["mutation"])
+
+            if(person in one_gene):
+                individual_prob[person] = PROBS["trait"][1][person in have_trait]
+
+                if (people[person]["mother"] in no_gene and (people[person]["father"] in no_gene)):
+                    individual_prob[person] *= (PROBS["mutation"])*(1-PROBS["mutation"]) + (1-PROBS["mutation"])*(PROBS["mutation"])
+                if (people[person]["mother"] in one_gene and (people[person]["father"] in no_gene)):
+                    individual_prob[person] *= (0.5)*(1-PROBS["mutation"]) + (0.5)*(PROBS["mutation"])
+                if (people[person]["mother"] in two_genes and (people[person]["father"] in no_gene)):
+                    individual_prob[person] *= (1-PROBS["mutation"])*(1-PROBS["mutation"]) + (PROBS["mutation"])*(PROBS["mutation"])
+
+                if (people[person]["mother"] in no_gene and (people[person]["father"] in one_gene)):
+                    individual_prob[person] *= (PROBS["mutation"])*(0.5) + (1-PROBS["mutation"])*(0.5)
+                if (people[person]["mother"] in one_gene and (people[person]["father"] in one_gene)):
+                    individual_prob[person] *= (0.5)*(0.5) + (0.5)*(0.5)
+                if (people[person]["mother"] in two_genes and (people[person]["father"] in one_gene)):
+                    individual_prob[person] *= (1-PROBS["mutation"])*(0.5) + (PROBS["mutation"])*(0.5)
+
+                if (people[person]["mother"] in no_gene and (people[person]["father"] in two_genes)):
+                    individual_prob[person] *= (PROBS["mutation"])*(PROBS["mutation"]) + (1-PROBS["mutation"])*(1-PROBS["mutation"])
+                if (people[person]["mother"] in one_gene and (people[person]["father"] in two_genes)):
+                    individual_prob[person] *= (0.5)*(PROBS["mutation"]) + (0.5)*(1-PROBS["mutation"])
+                if (people[person]["mother"] in two_genes and (people[person]["father"] in two_genes)):
+                    individual_prob[person] *= (1-PROBS["mutation"])*(PROBS["mutation"]) + (PROBS["mutation"])*(1-PROBS["mutation"])
+        
+            if(person in two_genes):
+                individual_prob[person] = PROBS["trait"][2][person in have_trait]
+
+                if (people[person]["mother"] in no_gene and (people[person]["father"] in no_gene)):
+                    individual_prob[person] *= (PROBS["mutation"])*(PROBS["mutation"])
+                if (people[person]["mother"] in one_gene and (people[person]["father"] in no_gene)):
+                    individual_prob[person] *= (0.5)*(PROBS["mutation"])
+                if (people[person]["mother"] in two_genes and (people[person]["father"] in no_gene)):
+                    individual_prob[person] *= (PROBS["mutation"])*(PROBS["mutation"])
+
+                if (people[person]["mother"] in no_gene and (people[person]["father"] in one_gene)):
+                    individual_prob[person] *= (PROBS["mutation"])*(0.5)
+                if (people[person]["mother"] in one_gene and (people[person]["father"] in one_gene)):
+                    individual_prob[person] *= (0.5)*(0.5)
+                if (people[person]["mother"] in two_genes and (people[person]["father"] in one_gene)):
+                    individual_prob[person] *= (1-PROBS["mutation"])*(0.5)
+
+                if (people[person]["mother"] in no_gene and (people[person]["father"] in two_genes)):
+                    individual_prob[person] *= (PROBS["mutation"])*(1-PROBS["mutation"])
+                if (people[person]["mother"] in one_gene and (people[person]["father"] in two_genes)):
+                    individual_prob[person] *= (0.5)*(1-PROBS["mutation"])
+                if (people[person]["mother"] in two_genes and (people[person]["father"] in two_genes)):
+                    individual_prob[person] *= (1-PROBS["mutation"])*(1-PROBS["mutation"])
+
+            # print("Individual Prob")
+            # print(individual_prob)
+            result = 1
+            for x in individual_prob.values():
+                result *= x
+            return result
+
+    
+    
+    
+
+    # raise NotImplementedError
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
@@ -149,7 +286,32 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+    # print("Probabilities")
+    # for person in probabilities:
+    #     print(person)
+    #     print(probabilities[person])
+    # print("")
+    # print("One Gene")
+    # print(one_gene)
+    # print("Two Genes")
+    # print(two_genes)
+    # print("Have Trait")
+    # print(have_trait)
+    # print("")
+    # print("")
+    # input()
+    for person in probabilities:
+        if person in two_genes:
+            probabilities[person]["gene"][2] += p
+            probabilities[person]["trait"][person in have_trait] += p
+        elif person in one_gene:
+            probabilities[person]["gene"][1] += p
+            probabilities[person]["trait"][person in have_trait] += p
+        else:
+            probabilities[person]["gene"][0] += p
+            probabilities[person]["trait"][person in have_trait] += p
+        
+    # raise NotImplementedError
 
 
 def normalize(probabilities):
@@ -157,7 +319,21 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    # print("Probabilities")
+    # print(probabilities)
+    for person in probabilities:
+        # print("!!!!!!!!!!!!!!")
+        # print(numpy.linalg.norm([probabilities[person]["gene"][0], probabilities[person]["gene"][1], probabilities[person]["gene"][2]]))
+        geneSum = probabilities[person]["gene"][0]+probabilities[person]["gene"][1]+probabilities[person]["gene"][2]
+        probabilities[person]["gene"][0] /= geneSum
+        probabilities[person]["gene"][1] /= geneSum
+        probabilities[person]["gene"][2] /= geneSum
+
+        traitSum = probabilities[person]["trait"][True] + probabilities[person]["trait"][False]
+        probabilities[person]["trait"][True] /= traitSum
+        probabilities[person]["trait"][False] /= traitSum
+
+    # raise NotImplementedError
 
 
 if __name__ == "__main__":
