@@ -162,7 +162,6 @@ def joint_probability(people, one_gene, two_genes, have_trait):
     # print("~~~~~~~~~~~~~~")
     individual_prob = {}
     for person in people:
-        # if (person not in have_trait):
 
         if( (people[person]["mother"] == None) or (people[person]["father"] == None) ):
             # print("Parents Unknown")
@@ -193,6 +192,7 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         # print("Checking " + person)
         if( (people[person]["mother"] != None) or (people[person]["father"] != None) ):
             # print(person + " has parents")
+            # input()
             if(person in no_gene):
                 individual_prob[person] = PROBS["trait"][0][person in have_trait]
 
@@ -265,12 +265,12 @@ def joint_probability(people, one_gene, two_genes, have_trait):
                 if (people[person]["mother"] in two_genes and (people[person]["father"] in two_genes)):
                     individual_prob[person] *= (1-PROBS["mutation"])*(1-PROBS["mutation"])
 
-            # print("Individual Prob")
-            # print(individual_prob)
-            result = 1
-            for x in individual_prob.values():
-                result *= x
-            return result
+    # print("Individual Prob")
+    # print(individual_prob)
+    result = 1
+    for x in individual_prob.values():
+        result *= x
+    return result
 
     
     
