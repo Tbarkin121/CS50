@@ -115,9 +115,6 @@ class CrosswordCreator():
                 self.domains[mystery].add(word)
             # print(self.domains[mystery])
 
-        var1 = Variable(i=0, j=1, direction=Variable.ACROSS, length=3)
-        var2 = Variable(i=0, j=1, direction=Variable.DOWN, length=5)       
-        self.revise(var1, var2)
         # raise NotImplementedError
 
     def revise(self, x, y):
