@@ -188,7 +188,7 @@ class NimAI():
 
         if(epsilon):
             random_action = random.choice(list(Nim.available_actions(state)))
-            random_choise = random.choices((best_action, random_action), weights=[self.epsilon, 1-self.epsilon], k=1)
+            random_choise = random.choices((best_action, random_action), weights=[1-self.epsilon, self.epsilon], k=1)
             # debug("random_choise[0]")
             return random_choise[0]
             
