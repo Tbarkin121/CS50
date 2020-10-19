@@ -1,7 +1,7 @@
 import math
 import random
 import time
-
+import sys
 
 class Nim():
 
@@ -101,7 +101,12 @@ class NimAI():
         Return the Q-value for the state `state` and the action `action`.
         If no Q-value exists yet in `self.q`, return 0.
         """
-        raise NotImplementedError
+        # debug("state")
+        # debug("action")
+        if (tuple(state), tuple(action)) in self.q:
+            return self.q[(tuple(state), tuple(action))]
+        return 0 
+        # raise NotImplementedError
 
     def update_q_value(self, state, action, old_q, reward, future_rewards):
         """
@@ -118,7 +123,9 @@ class NimAI():
         `alpha` is the learning rate, and `new value estimate`
         is the sum of the current reward and estimated future rewards.
         """
-        raise NotImplementedError
+        new_q = reward + future_rewards
+        self.q[(tuple(state), action)] = old_q + self.alpha * (new_q - old_q)
+        # raise NotImplementedError
 
     def best_future_reward(self, state):
         """
@@ -130,7 +137,22 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-        raise NotImplementedError
+        if Nim.available_actions(state) is None:
+            return 0
+        # debug("self.q")
+        # debug("state")
+        best_value = 0
+        
+        for action in Nim.available_actions(state):
+            # print(self.q[(tuple(state), tuple(action))])
+            # input()
+            if (tuple(state), tuple(action)) in self.q:
+                if( best_value < self.q[(tuple(state), action)]):
+                    best_value = self.q[(tuple(state), action)]
+                
+        return best_value
+        
+        # raise NotImplementedError
 
     def choose_action(self, state, epsilon=True):
         """
@@ -147,7 +169,32 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        raise NotImplementedError
+        # debug("state")
+        # debug("epsilon")
+        # print()
+        best_action = (0,0)
+        best_value = 0
+        for action in Nim.available_actions(state):
+            if (tuple(state), tuple(action)) in self.q:
+                if( best_value < self.q[(tuple(state), action)]):
+                    best_value = self.q[(tuple(state), action)]
+                    best_action = action
+        # debug("best_action")
+        if(best_action == (0,0)):
+            # print("Pick a random action")
+            random_action = tuple(random.choice(list(Nim.available_actions(state))))
+            # debug("random_action")
+            return (random_action)
+
+        if(epsilon):
+            random_action = random.choice(list(Nim.available_actions(state)))
+            random_choise = random.choices((best_action, random_action), weights=[self.epsilon, 1-self.epsilon], k=1)
+            # debug("random_choise[0]")
+            return random_choise[0]
+            
+        return tuple(best_action)
+        
+        # raise NotImplementedError
 
 
 def train(n):
@@ -263,3 +310,7 @@ def play(ai, human_player=None):
             winner = "Human" if game.winner == human_player else "AI"
             print(f"Winner is {winner}")
             return
+
+def debug(expression):
+    frame = sys._getframe(1)
+    print(expression, '=', repr(eval(expression, frame.f_globals, frame.f_locals)))
