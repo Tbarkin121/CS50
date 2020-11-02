@@ -1,5 +1,7 @@
 import nltk
 import sys
+import os
+import string 
 
 FILE_MATCHES = 1
 SENTENCE_MATCHES = 1
@@ -48,7 +50,14 @@ def load_files(directory):
     Given a directory name, return a dictionary mapping the filename of each
     `.txt` file inside that directory to the file's contents as a string.
     """
-    raise NotImplementedError
+    contents = {}
+    for filename in os.listdir(directory):
+        # print(os.path.join(directory, filename))
+        f = open(os.path.join(directory, filename), "r")
+        contents[filename] = f.read().replace('\n', '')
+        f.close
+    return contents
+#    raise NotImplementedError
 
 
 def tokenize(document):
@@ -59,7 +68,24 @@ def tokenize(document):
     Process document by coverting all words to lowercase, and removing any
     punctuation or English stopwords.
     """
-    raise NotImplementedError
+    # Extract words
+    contents = [
+        word.lower() for word in
+        nltk.word_tokenize(document)
+        # if word.isalpha()
+    ]
+    checklist = nltk.corpus.stopwords.words("english") + list(string.punctuation) + ["==", "====", "=====", "======", "''", "``"]
+    for bad_entry in checklist:
+        try:
+            while True:
+                contents.remove(bad_entry)
+        except ValueError:
+            pass
+
+    print(contents)
+    input()
+    return contents
+#    raise NotImplementedError
 
 
 def compute_idfs(documents):
