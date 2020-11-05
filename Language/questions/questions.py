@@ -2,6 +2,8 @@ import nltk
 import sys
 import os
 import string 
+import math
+from collections import Counter
 
 FILE_MATCHES = 1
 SENTENCE_MATCHES = 1
@@ -82,8 +84,8 @@ def tokenize(document):
         except ValueError:
             pass
 
-    print(contents)
-    input()
+    # print(contents)
+    # input()
     return contents
 #    raise NotImplementedError
 
@@ -96,7 +98,19 @@ def compute_idfs(documents):
     Any word that appears in at least one of the documents should be in the
     resulting dictionary.
     """
-    raise NotImplementedError
+    idfs = {}
+    for document in documents.keys():
+        for word in set(documents[document]):
+            try:
+                idfs[word] += 1
+            except:
+                idfs[word] = 1
+    for word in idfs.keys():
+        idfs[word] = math.log(len(documents)/idfs[word])
+    # print(idfs)
+    # input()
+    return idfs
+    # raise NotImplementedError
 
 
 def top_files(query, files, idfs, n):
@@ -106,7 +120,28 @@ def top_files(query, files, idfs, n):
     to their IDF values), return a list of the filenames of the the `n` top
     files that match the query, ranked according to tf-idf.
     """
-    raise NotImplementedError
+    file_scores = {}
+    for source in files:
+        file_scores[source] = 0
+        wordcount = Counter(files[source])
+        for word in query:
+            if(word in files[source]):
+                file_scores[source] += wordcount[word]*idfs[word]
+                # print(word)
+                # print(wordcount[word])
+                # print(idfs[word])
+                # print(file_scores)
+                # input()
+    sorted_score =  sorted(file_scores.items(), key=lambda x: x[1], reverse=True)
+    final_list = []
+    # print(sorted_score)
+    # input()
+    for i in range(n):
+        final_list.append(sorted_score[i][0])
+    # print(final_list)
+    # input()
+    return final_list
+    # raise NotImplementedError
 
 
 def top_sentences(query, sentences, idfs, n):
@@ -117,7 +152,24 @@ def top_sentences(query, sentences, idfs, n):
     the query, ranked according to idf. If there are ties, preference should
     be given to sentences that have a higher query term density.
     """
-    raise NotImplementedError
+    sentence_scores = {}
+    for sentence in sentences:
+        sentence_scores[sentence] = (0, 0) #idfs, word_count -> word_density later
+        for word in query:
+            if(word in tokenize(sentence)):
+                sentence_scores[sentence] = (sentence_scores[sentence][0] + idfs[word], sentence_scores[sentence][1] + 1)
+            sentence_scores[sentence] = (sentence_scores[sentence][0], sentence_scores[sentence][1]/len(sentence))
+
+    sorted_score =  sorted(sentence_scores.items(), key=lambda x: x[1], reverse=True)
+    final_list = []
+    # print(sorted_score)
+    # input()
+    for i in range(n):
+        final_list.append(sorted_score[i][0])
+    # print(final_list)
+    # input()
+    return final_list
+    # raise NotImplementedError
 
 
 if __name__ == "__main__":
